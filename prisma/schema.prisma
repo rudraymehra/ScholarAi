@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+  // For Turso (production), use:
+  // provider = "sqlite" 
+  // url = env("TURSO_DATABASE_URL")
+  // Note: Turso is SQLite-compatible
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String?   @unique
+  name          String?
+  image         String?
+  twitterId     String?   @unique
+  twitterHandle String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  searches      Search[]
+  notes         Note[]
+}
+
+model Search {
+  id        String   @id @default(cuid())
+  query     String
+  answer    String
+  sources   String   // JSON stringified array of sources
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  query     String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Visit {
+  id          String   @id @default(cuid())
+  fingerprint String   @unique
+  userAgent   String?
+  ipHash      String?
+  createdAt   DateTime @default(now())
+}
+
+model Analytics {
+  id           String   @id @default(cuid())
+  totalUsers   Int      @default(0)
+  totalSearches Int     @default(0)
+  updatedAt    DateTime @updatedAt
+}
